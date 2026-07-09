@@ -1,0 +1,715 @@
+文件路径操作快捷键:ctrl+L
+服务器地址Ftp://192.168.100.101
+用户：FtpShare
+密码：Ftp@Share
+
+Ubuntu密码：qj_1211
+
+串口连接
+sudo minicom
+/dev/tty
+
+网口连接：
+ping IP
+ssh root@IP
+password：rockchip
+
+播放H264文件 
+ffplay 0.h264
+
+mount -o nolock 192.168.100.103:/home/qijingonline/lwj /mnt/nfs11
+mount -o nolock 192.168.100.103:/home/qijingonline/lwj /oem/nfs
+mount -o nolock 192.168.100.103:/home/qijingonline /oem/nfs
+mount -o nolock 192.168.100.116:/home/alex/chen0 /oem/nfs116/	
+mount -o nolock 192.168.100.121:/home/alex/ /customer/nfs/	
+mount -o nolock 192.168.100.136:/home/alex/ /customer/nfs/
+
+mount sdcard
+mount -t vfat /dev/mmcblk2p1  /mnt/sdcard/
+mount -o ro /dev/mmcblk2p1  /mnt/sdcard/
+sd卡修复
+fsck.vfat -p /dev/mmcblk2p1  
+mount -o rw,remount /mnt/sdcard/
+mkfs.vfat /dev/mmcblk2p1
+获取挂载信息（包括挂载是否SD卡/dev/mmcblk0p1）
+cat /proc/mounts 
+热插拔	
+mdev
+
+amixer -c1 cset numid=1 6
+aplay -Dplughw:1,0 1.wav
+aplay -Dplughw:0,0 1.wav
+
+modetest -M rockchip -s 56@53:1280x720 -v
+
+CAN操作指令
+ip link set can0 up type can bitrate 250000
+ip link set can0 up
+ip link set can0 down
+cansend can0 123#1122334455667788
+candump can0
+ip -details link show can0
+dmesg | grep can
+echo  4096 > /sys/class/net/can0/tx_queue_len
+
+开机自启动的文件路径
+/etc/init.d/S98_lunch_init 
+
+
+串口操作指令
+发送 echo -e "AT+CG\r\n" > /dev/ttyS4 
+发送 echo -e "AT+AT\r\n" > /dev/ttyS4 
+发送 echo "234234" > /dev/ttyS4 
+发送 echo "4154002000000548454C4C4F0D0A" > /dev/ttyS4 
+由于uart转CAN在AT模式下的发送
+echo -e "\x41\x54\x00\x20\x00\x00\x05\x48\x45\x4C\x4C\x4F\x0D\x0A" > /dev/ttyS4
+4154002000000548454C4C4F0D0A  
+接收 cat /dev/ttyS4 
+查看串口参数	stty -F /dev/ttyS4 -a
+设置串口参数	stty -F /dev/ttyS4 ispeed 115200 ospeed 115200 cs8
+
+1、查看串口是否可用
+   可以对串口发送数据比如对com1口，echo /dev/ttyS0
+2、查看串口名称使用
+   ls -l /dev/ttyS*
+   一般情况下串口的名称全部在dev下面，如果你没有外插串口卡的话默认是dev下的ttyS* ,一般ttyS0对应com1，ttyS1对应com2，当然也不一定是必然的；
+3、查看串口驱动
+   cat /proc/tty/drivers/serial
+4、查看串口设备
+   dmesg | grep ttyS*
+5、查一下板子上的串口有没有设备
+   grep tty /proc/devices
+6、在QT下写的串口程序不能正常接收发送数据，可能是linux下的串口设备没有打开，需要改变串口设备
+的权限 chmod 777 /dev/ttyUSB0
+
+
+APP文件路径
+/home/alex/rv1126_v2.2_edge/device/rockchip/oem/oem_ipc
+编译
+./mkfirmware.sh 
+编译生成镜像文件
+./build.sh firmware
+./build.sh updateimg
+
+文件复制
+scp root@192.168.100.103:/home/qijingonline/lwj/video/1.wav ./
+scp ./output.yuv root@192.168.100.103:/home/qijingonline/lwj/video/
+scp ./output.yuv root@192.168.100.103:/home/qijingonline/lwj/video/
+
+K1 UART转CAN口所需数据
+标准帧：060A 060B
+扩展帧：0x18F05533  0x18F05132
+
+GCC编译文件
+arm-linux-gnueabihf-gcc uart1_mcu_test.c -o mcu_test -lpthread
+arm-linux-gnueabihf-gcc uart3_mcu_test.c -o mcu_test -I ./ -lpthread
+arm-none-linux-gnueabi-gcc
+/home/alex/toolChain/gcc-sigmastar-9.1.0-2019.11-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc client.c -o queue_read -lpthread
+
+cmake -D CMAKE_C_COMPILER=/home/alex/toolChain/gcc-sigmastar-9.1.0-2019.11-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-9.1.0-gcc -D CMAKE_CXX_COMPILER=/home/alex/toolChain/gcc-sigmastar-9.1.0-2019.11-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-9.1.0-g++
+
+帧获取
+v4l2-ctl --verbose -d /dev/video0 --set-fmt-video=width=1920,height=1080,pixelformat='NV16' \
+ --stream-mmap=4 \
+ --stream-skip=0  --stream-count=10 \
+ --stream-to=/root/output.yuv 
+
+检测打印到文件
+dmesg | grep 2855 > dmesg_h50.txt
+dmesg | grep can0 >log.txt
+dmesg > log.txt
+
+
+声音播放
+amixer -c1 contents
+aplay -Dhw:1,0 ./1.wav
+aplay -Dhw:0,0 ./1.wav
+
+CANemc测试程序打开指令
+ ./emccan -a 0 -c can0 -t /dev/ttyS4 -b 115200
+
+
+权限
+chmod 777 ./emccan 
+chmod -X ./emccan
+递归授权
+chmod -R 777 文件名|目录名
+
+media-ctl /dev/media0 --print-topology
+
+
+stty -F /dev/ttyS4 ispeed 115200 ospeed 115200 cs8
+stty -F /dev/ttyS4 -a
+
+
+CAN2模块配置
+echo -e "AT+AT\r\n" > /dev/ttyS4
+echo -e "AT+ET\r\n" > /dev/ttyS4
+echo "AT+AT" > /dev/ttyS4
+echo "AT+CG" > /dev/ttyS4
+echo "AT+ET" > /dev/ttyS4
+echo -e "AT+USART_PARAM\r\n" > /dev/ttyS4
+echo "234234" > /dev/ttyS4
+
+CAN程序使用指令
+./smartvehv2 -a 0 -c can0 -t /dev/ttyS4 -b 115200
+./ttycansendv2 /dev/ttyS4 115200 60A
+
+ip link set can0 up
+ip link set can0 up type can bitrate 250000
+ip link set can0 down
+cansend can0 123#1122334455667788
+candump can0
+ip -details link show can0
+
+
+mount -o nolock 192.168.100.103:/home/qijingonline/lwj /mnt/nfs11
+
+运行协议上报的指令
+qemu-arm -L /home/qijingonline/a311d/buildroot/prebuilts/build-tools/gcc-linaro-6.3.1-2017.02-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/ ./upload.out 
+
+
+ps aux |grep adas
+top -d 0.5
+
+i2c 操作
+查询总线上的设备
+i2cdetect -y 3
+获取设备地址为0x68的0xBB寄存器的值
+i2cget -y -f 3 0x68 0xBB
+i2cget -y -f 2 0x51 0x08	//0x08:rtc年 0x07:rtc月 0x05:rtc日
+
+i2cset -f -y 1 0x49 0x23 5 
+i2cset -f -y 2 0x51 0x08 33 
+
+
+消息队列操作
+ipcs -m  打印出使用共享内存进行进程间通信的信息
+ipcs -q   打印出使用消息队列进行进程间通信的信息
+ipcs -s  打印出使用信号进行进程间通信的信息
+ipcrm -q msqid  移除用msqid标识的消息队列
+
+ip -details link show can0
+
+时间查询
+date
+时间设置
+date -s "1970-01-03 15:58:30"
+date -s "2023-08-15 15:50:39"
+export TZ=CST-8
+--设置日期--
+#date -s "2016-09-10"
+#date -s "2016/09/10"
+#date -s "09/10/2016"
+这样设置的话，由于没有设置时间，所以时间都是00:00:00
+https://blog.csdn.net/qq_41248872/article/details/83622146
+
+如果时区不是中国的东八区，可设置环境变量
+export TZ=CST-8
+设置后就可以显示中国时间了。
+
+同步时间
+./ntpclient -s -d -c 1 -i 5 -h 202.112.31.197 不同的服务器地址(sbin不存在ntpclient)
+
+ntpclient -s -d -c 1 -i 5 -h 111.230.50.201 
+
+进程
+killall  quectel-CM
+ps  -aux |grep quectel*
+ps -T -p <pid>
+top -H -p <pid>
+
+
+ps -ef | grep -i 'config=/root/dmsdetector_v0.0.02/tempfile/mongod.config' | grep -v "grep" | wc -l`
+ps -ef | grep /root/dmsdetector_v0.0.02/test_protocal | grep -v grep | awk '{print $2}
+
+
+移远4G模组状态
+==================================================================================
+echo -e "AT+CPIN?\r\n" > /dev/ttyUSB3
+
+echo -e "AT+CGREG?\r\n" > /dev/ttyUSB3
+
+echo -e "ATE0\r\n" > /dev/ttyUSB3
+
+echo -e "AT+QGPS=1\r\n" > /dev/ttyUSB3
+
+echo -e "AT+QGPSLOC=0\r\n" > /dev/ttyUSB3
+
+echo -e "AT+QGPSLOC=?\r\n" > /dev/ttyUSB3
+
+echo -e "AT+QGPSEND\r\n" > /dev/ttyUSB3
+
+echo -e "AT+QGPSCFG=\"nmeasrc\",1\r\n" > /dev/ttyUSB3
+
+
+echo -e "AT+QGPSGNMEA=\"GGA\"\r\n" > /dev/ttyUSB3
+
+
+echo -e "AT+QGPSGNMEA=\"RMC\"\r\n" > /dev/ttyUSB3
+
+echo -e "AT+QGPSCFG=\"outport\"\r\n" > /dev/ttyUSB3
+
+echo -e "AT+CIMI\r\n" > /dev/ttyUSB3
+echo -e "AT+COPS?\r\n" > /dev/ttyUSB3
+
+echo -e "AT+QGPSCFG=\"fixfreq\",1\r\n" > /dev/ttyUSB3
+
+echo -e "ATE0\r\n" > /dev/ttyUSB3
+echo -e "AT+QGPS=1\r\n" > /dev/ttyUSB3
+while(1)
+echo -e "AT+QGPSGNMEA=\"RMC\"\r\n" > /dev/ttyUSB3
+sleep(1);
+==================================================================================
+
+网关
+路由信息：route -n
+ip route show
+route add default  gw 192.168.100.1
+添加网关：ip route add default via 10.118.222.233 dev wwan0 metric 11
+metric （可信度）：越小越高
+删除网关： ip route del default via 10.118.222.233 dev wwan0
+ip route del default via 192.168.100.1 dev eth0
+route del -net 169.254.0.0 netmask 255.255.0.0 
+# 或者添加具体路由
+sudo ifconfig ens33 192.168.10.85
+sudo ip route add 192.168.10.0/24 dev ens33
+sudo ip route add default via 192.168.10.1 dev ens33
+
+删除和添加设置默认网关
+route del default gw 192.168.100.1
+route add default gw 192.168.120.240
+
+
+ifconfig eth0 down
+ifconfig eth0 up
+ifconfig eth0 hw ether 1234567890ab
+ifconfig eth0 hw ether xx:xx:xx
+
+ifconfig eth0 hw ether 00:30:78:44:70:75
+ifconfig eth0 192.168.100.200
+route add default  gw 192.168.100.1
+
+udhcpc -b -i eth0重新分配ip
+
+
+tar cvf /dir/file.tar /dir/file  #仅打包，不压缩
+tar xvf backup.tar
+
+
+9、stty配置串口
+
+stty -F /dev/ttyS3 ispeed 115200 ospeed 115200 cs8
+
+ while : ;do  echo 1234 > /dev/ttyS3 ;sleep 1;done; 回环测试，循环操作
+
+      或者 while true;do echo 1234 > /dev/ttyS3;sleep 1;done
+
+ stty -F /dev/ttyS3 -a
+
+echo -e "AT+CPIN" > /dev/ttyS3 
+
+cat /sys/kernel/debug/clk/clk_summary | grep uart
+
+stty -F /dev/ttyS3 -a
+
+
+stty -F /dev/ttyS3 ispeed 115200 ospeed 115200 cs8
+
+
+
+ls /sys/devices/platform/
+ls|wc -w 
+
+查看哪
+些程序打开了这个串口
+lsof | grep ttyS1
+
+
+echo 1 > /sys/kernel/debug/clk/pclk_uart3/clk_enable_count
+
+echo 24000000 > /sys/kernel/debug/clk/sclk_uart3/clk_rate
+
+cat /sys/kernel/debug/clk/sclk_uart3/clk_enable_count
+
+echo 1 > /sys/kernel/debug/clk/sclk_uart3/clk_enable_count
+
+
+gpio 控制32位
+查询时钟状态：cat /sys/kernel/debug/clk/clk_summary |grep gpio
+寄存器控制时钟使能：echo 1 > /sys/kernel/debug/clk/pclk_gpioN/clk_enable_count
+cd /sys/class/gpio/gpioN
+echo 41 > export        //暴露接口
+cd gpio41
+echo out > direction    //设置方向
+echo 1 > value            //设置输出电平值  0低  1高
+echo 0 > value
+echo 66 > export 
+
+查看内核版本
+uname -srm
+uname -a
+
+
+ADB
+adb devices
+往手机SDCard传递文件：
+adb push 文件名 手机端SDCard路径
+adb push 123.jpg /sdcard/
+
+从手机端下载文件：
+adb pull /sdcard/xxx.txt
+
+liunx打包文件
+https://www.cnblogs.com/lijc1990/p/3545503.html
+
+mkdir -p 递归创建目录
+
+update ota /userdata/update.img
+
+
+
+补丁操作
+*生成补丁：
+$ diff -uN test0 test1 >test1.patch
+这样将通过比较，生成test1的补丁文件。这里选项u表示使用同一格式输出这样产生的输出便于阅读易于修改，N表示把不存在的文件看做empty的.就算文件test0不存在，也会生成补丁。
+
+*把test0通过打补丁变成test1文件：
+$ patch -p0 <test1.patch
+或$patch <test1.patch
+这样，test0的内容将和test1的内容一样，但是文件名称还是test0。关于patch的选项见后面多文件有说明。当前目录下可以有test1.如果比较的时候test0是不存在的，那么这时候会生成一个test0文件。
+
+*把打过补丁的test0还原:
+$ patch -RE -p0<test1.patch
+或$patch -R <test1.patch
+这样，test0的内容将还原为原来没有打过补丁的状态。当前目录下可以有test1.这里的-E选项是要求patch在文件为空的时候删除文件，这个选项是不必要的因为patch是根据时间戳来判断一个文件是否存在。如果比较的时候test0是不存在的，这将会删除test
+文件。
+**
+
+
+rockchip人脸授权命令
+./step1 --user="maidasimin" --passwd="fEtjPM2fXBZoM" --output="key.lic" --device_info="device.inf"
+
+
+
+TTS “宇音天下”
+\xFD\x00\x0A\x01\x03\x87\x5B\xF3\x97\x29\x59\x0B\x4E
+
+
+\xFD\x00\x01\x21	芯片状态查询
+\xFD\x00\x01\xFF	唤醒
+
+
+\xFD\x00\x16\x01\x04\x00\x68\x00\x65\x00\x6c\x00\x6c\x00\x6f\x00\x20\x00\x77\x00\x6f\x00\x72\x00\x6c\x00\x64
+
+echo -e -n "\xdd\xff" > /dev/ttymxc0
+
+\xfd\x00\x0a\x01\x03\x87\x5b\xf3\x97\x29\x59\x0b\x4e
+ echo -e -n "\xFD\x00\x0A\x01\x03\x87\x5B\xF3\x97\x29\x59\x0B\x4E" > /dev/ttyS5 
+ 
+		\xFD\x00\x0A\x01\x03\x87\x5B\xF3\x97\x29\x59\x0B\x4E
+
+echo -e -n "\xFD\x00\x0A\x01\x01\xD3\xEE\xD2\xF4\xCC\xEC\xCF\xC2" > /dev/ttyS5 
+		\xFD\x00\x0A\x01\x01\xD3\xEE\xD2\xF4\xCC\xEC\xCF\xC2
+
+\xFD\x00\x1E\x01\x01\xBB\xB6\xD3\xAD\xB9\xDB\xBF\xB4\xD3\xEF\xD2\xF4\xBA\xCF\xB3\xC9\xCF\xB5\xCD\xB3\xB5\xC4\xD1\xDD\xCA\xBE\xA3\xA1
+
+
+echo -e -n "\xFD\x00\x1E\x01\x01\xBB\xB6\xD3\xAD\xB9\xDB\xBF\xB4\xD3\xEF\xD2\xF4\xBA\xCF\xB3\xC9\xCF\xB5\xCD\xB3\xB5\xC4\xD1\xDD\xCA\xBE\xA3\xA1" > /dev/ttyS5 
+
+echo -e -n "\xFD\x00\x0E\x01\x01\xBB\xB6\xD3\xAD\xB9\xDB\xBF\xB4\xD3\xEF\xD2\xF4\xBA\xCF\xB3\xC9\xCF\xB5\xCD\xB3\xB5\xC4\xD1\xDD\xCA\xBE\xA3\xA1" > /dev/ttyS0 
+
+
+/*******************
+RS485
+cd /sys/class/gpio/gpioN
+echo 66 > export        //暴露接口
+cd gpio41
+echo out > direction    //设置方向
+echo 1 > value            //设置输出电平值  0低  1高
+echo 0 > value
+stty -F /dev/ttyS3 -a
+stty -F /dev/ttyS3 ispeed 115200 ospeed 115200 cs8
+
+
+tts
+	FD000A0101D3EED2F4CCECCFC2
+echo -e -n "\xFD\x00\x0A\x01\x01\xD3\xEE\xD2\xF4\xCC\xEC\xCF\xC2" > /dev/ttyS0
+echo -e -n "\xFD\x00\x0A\x01\x00\xD3\xEE\xD2\xF4\xCC\xEC\xCF\xC2" > /dev/ttyS
+echo -e -n "\xFD\x00\x0A\x01\x03\x87\x5B\xF3\x97\x29\x59\x0B\x4E" > /dev/ttyS0
+echo -e -n "\xFD\x00\x06\x01\x01\x5B\x76\x39\x5D" > /dev/ttyS0	//tts音量调节
+**********************/
+
+
+./ntpd -c /oem/protocol/ntp.conf
+
+liunx交叉编译器位置
+/home/qijingonline/lwj/rv1126_v2.2_edge/prebuilts/gcc/linux-x86/arm/gcc-arm-8.3-2019.03-x86_64-arm-linux-gnueabihf/bin
+
+<sigmastar>
+infinity6e_ssc012b_s01a_2+2mipi_spinand_defconfig
+*****************************************************
+export LD_LIBRARY_PATH=$(pwd)/lib:$LD_LIBRARY_PATH
+
+bin/ipcmgr -c ./bin &
+
+bin/avapp -s ./vendor/config/resource &
+
+bin/tutk_ipc -u CLYUB93WZDZ4BNPGYHFJ
+*****************************************************
+
+编译config
+make menuconfig
+
+make savedefconfig
+
+查看可执行文件依赖的库
+objdump -x app | grep NEEDED
+/home/alex/codehub/hardware/sstar-ipc/tools/gcc-sigmastar-9.1.0-2019.11-x86_64_arm-linux-gnueabihf/bin
+export LD_LIBRARY_PATH=/home/alex/codehub/hardware/sstar-ipc/tools/gcc-sigmastar-9.1.0-2019.11-x86_64_arm-linux-gnueabihf/bin:$LD_LIBRARY_PATH
+
+查库里包含的函数名
+nm -n --defined-only libYI_API_sigmastar_SSC30KQ_linux.a | grep *
+
+./wpa_supplicant -D wext -i wlan0 -c /customer/wpa_supplicant.conf 
+./wpa_supplicant -B -Dwext -iwlan0 -c/customer/wifi/wpa.conf
+/********************手动连接wifi****************************/
+1.连接wifi
+./wpa_supplicant -D nl80211 -i wlan0 -c /tmp/wpa_supplicant.conf
+【wpa_supplicant.conf】文件内容：
+---------------【wpa_supplicant.conf】文件内容-----------------------
+ctrl_interface=/tmp/wpa_supplicant
+update_config=1
+network={
+        ssid="mdsm"
+        psk="qijing123"
+        priority=2
+}
+---------------------------------------------------------------------
+2.获得ip
+udhcpc -i wlan0 -s /etc/init.d/udhcpc.script 
+
+/********************手动连接wifi end ****************************/
+
+
+./prog_audio_all_test_case -O -i ./abnormal.wav -D 0
+
+set -f gatewayip 192.168.100.1
+set -f ipaddr 192.168.100.188
+set -f netmask 255.255.255.0
+set -f serverip 192.168.100.110
+saveenv
+estar
+
+./prog_audio_all_test_case -I -o ./ -d 0 -m 0 -c 1 -s 8000 
+./prog_audio_all_test_case -O -i ./abnormal.wav -D 0 -V -10
+
+驱动
+------------------------------------------------------
+inmod 加载驱动
+lsmod 查看加载的驱动列表
+rmmod modname 卸载已加载的驱动
+modprobe -r modname 如果用以上命令无法卸载，先执行此命令
+在服务器运行中，执行top命令后，发现多个acpi_pad占用较多的CPU使用率，则可以执行rmmod acpi_pad进行卸载。也可以在内核启动配置文件中设置acpi_pad.disable=1
+------------------------------------------------------
+
+cat  /proc/mtd  查看磁盘情况
+dd if=/dev/mtd0 of=/mnt/sda4/uboot-env.bin
+
+od命令
+------------------------------------------------------
+https://zhuanlan.zhihu.com/p/338636685
+od -tx testfile
+以十六进制输出，默认以四字节为一组（一列）显示。
+od -tx1 testfile
+以十六进制输出，每列输出一字节。
+
+------------------------------------------------------
+
+touch /config/var/config/config_wifi 
+mount -o remount, rw /customer/
+mount -t vfat /dev/mmcblk0p1 /mnt
+flashcp -v /tmp/uImage /dev/mtd4
+
+修改cmake参数
+export PATH=/home/alex/lwjtmp/cmake/cmake-3.8.2/bin:$PATH
+cmake -D CMAKE_C_COMPILER=/home/alex/toolChain/gcc-sigmastar-9.1.0-2019.11-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-9.1.0-gcc -D CMAKE_CXX_COMPILER=/home/alex/toolChain/gcc-sigmastar-9.1.0-2019.11-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-9.1.0-g++
+cmake -D CMAKE_C_COMPILER=/home/alex/toolChain/gcc-sigmastar-9.1.0-2019.11-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-9.1.0-gcc -D CMAKE_CXX_COMPILER=/home/alex/toolChain/gcc-sigmastar-9.1.0-2019.11-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-9.1.0-g++
+
+将编译器添加到liunx环境变量里
+30kq
+export PATH=$PATH:/home/alex/toolChain/gcc-sigmastar-9.1.0-2019.11-x86_64_arm-linux-gnueabihf/bin
+377/377d
+export PATH=$PATH:/home/alex/toolChain/arm-sigmastar-linux-uclibcgnueabihf-9.1.0/bin
+hc1723
+export PATH=$PATH:/home/alex/toolChain/gcc-linaro-4.9-2016.02-x86_64_arm-linux-gnueabihf/bin
+t23
+export PATH=$PATH:/home/alex/toolChain/t23/mips-gcc540-uclibc0.9.33.2-64bit-r3.3.0.smaller/bin
+t31
+export PATH=$PATH:/home/alex/svnrepos/toolchain/mips-gcc472-glibc216-64bit-r2.3.3/bin
+379G
+export PATH=$PATH:/home/alex/toolChain/gcc-11.1.0-20210608-sigmastar-glibc-x86_64_arm-linux-gnueabihf/bin
+{
+export PATH=/home/alex/lwjtmp/duofangSDK/SDK_release_ljh/toolchain/arm-augentix-linux-uclibcgnueabihf/bin:$PATH
+make -C "/home/alex/lwjtmp/duofangSDK/SDK_release_ljh/toolchain" unpack CROSS_COMPILE=${CROSS_COMPILE_1}
+export PATH=/home/alex/lwjtmp/duofangSDK/SDK_release_ljh/toolchain/gcc-linaro-4.9-2016.02-x86_64_arm-linux-gnueabihf/bin:$PATH
+}
+
+将库添加到liunx环境变量里
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/lib
+
+gdb
+set solib-search-path /home/alex/lwjtmp/svn/ipcam_sd_format_360/app/360_ipc/lib/sstar:/home/alex/lwjtmp/svn/ipcam_sd_format_360/qq/customer/tutkipc/lib:solib-search-path:/home/alex/toolChain/gcc-sigmastar-9.1.0-2019.11-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/lib
+  
+svn代码版本管理
+--------------------------------------------------------------------------------------------------------------------
+svn add ./daemon_protocol/
+svn ci ./daemon_protocol/ -m "220409-1858"
+svn checkout https://192.168.100.101/svn/svn_mdsm01/smart_ship
+svn checkout https://192.168.100.101/svn/svn_mdsm01/ipcam
+svn checkout https://192.168.100.101/svn/svn_mdsm01/branches/ipcam_rec	//录像保存修改
+svn checkout https://192.168.100.101/svn/svn_mdsm01/branches/ipcam_small_flash
+svn checkout https://192.168.100.101/svn/svn_mdsm01/ipcam_ssc377d
+svn checkout https://192.168.100.101/svn/svn_mdsm01/ipcam_tx5115
+svn checkout https://192.168.100.101/svn/svn_mdsm01/branches/ipcam_30kq_XXPH
+
+svn diff -r  xxx:xxx  --summarize //svn diff 仅仅显示文件名
+svn resolve --accept =working ipcmgr
+
+ln -s /home/alex/toolChain/gcc-sigmastar-9.1.0-2019.11-x86_64_arm-linux-gnueabihf ./gcc-sigmastar-9.1.0-2019.11-x86_64_arm-linux-gnueabihf 
+
+svn 回滚
+svn update -r 200 
+SVN 查看更新日志
+svn log 
+svn resolved 被删除的路径（xxx/xxx/xxx）
+svn revert 被删除的路径 (xxx/xxx/xxx)
+svn revert dir -R  就可以成功恢复文件，之后再svn update 即可将要删的文件夹删除。
+svn revert 文件路径
+svn revert --recursive 目标路径
+svn revert . --depth infinity	(撤回"."路径对SVN本地文件的修改)
+使用 svn update --set-depth=exclude  xxx (进行文件的排除)
+使用SVN命令行解决树冲突
+https://blog.csdn.net/qq_36838191/article/details/103800465
+
+回退版本
+方法1： 用svn merge
+1) 先 svn up，保证更新到最新的版本，如20；
+2) 然后用 svn log ，查看历史修改，找出要恢复的版本，如10 。如果想要更详细的了解情况，可以使用svn diff -r 10:20 [文件或目录];
+3) 回滚到版本号10：svn merge -r 20:10 [文件或目录]，注意版本号之间的顺序，这个叫反向合并；
+4) 查看当前工作版本中的文件，如test.cpp和版本号10中文件的差别：svn diff -r 10 test.cpp， 有差别则手动改之；
+5) 若无差别，则提交：svn ci -m“back to r 10，xxxxx” [文件或目录]。这时svn库中会生成新的版本，如21。
+
+创建分支make
+svn cp -m "create branch ipcam_face_capture" https://192.168.100.101/svn/svn_mdsm01/ipcam https://192.168.100.101/svn/svn_mdsm01/branches/ipcam_face_capture
+获得分支
+
+svn co http://server/test/branches/future
+
+合并主干上的最新代码到分支上
+
+    在分支版本控制下执行
+
+svn merge http://server/test/trunk 
+
+分支合并到主干 
+     一旦分支上的开发结束，分支上的代码需要合并到主干。
+
+     SVN中执行该操作需要在trunk的工作目录下进行
+
+svn merge --reintegrate http://server/test/branches/future
+     
+分支合并到主干中完成后应当删该分支，因为在SVN中该分支已经不能进行刷新也不能合并到主干
+
+svn rm  http://server/test/branches/future  -m 'delete future'
+合并版本并将合并后的结果应用到现有的分支上
+
+    
+在另外分支future1版本控制下
+
+svn -r 148:149 merge http://server/test/trunk
+原文链接：https://blog.csdn.net/fmyzc/article/details/90057930
+
+svn cp -m "create branch ipcam_face_capture" https://192.168.100.101/svn/svn_mdsm01/ipcam https://192.168.100.101/svn/svn_mdsm01/branches/ipcam_face_capture
+----------------------------------------------------------------------------------------------------------------
+
+/-----------------secureCRT 设置---------------------/
+1.时间戳： [%Y%M%D_%h:%m:%s]
+/----------------------------------------------------/
+
+查看库里面提供的函数接口
+/*************************************************************************/
+mips-linux-uclibc-nm -n --defined-only ${line} | grep mbedtls_net_set_nonblock
+dir = "./"
+ls $dir | while read line
+do
+	file=${line}
+	echo ${line}
+	mips-linux-uclibc-nm -n --defined-only ${line} | grep mbedtls_net_set_nonblock
+done;
+/*************************************************************************/
+
+
+查看系统当前的线程数目
+pstree -p |wc -l
+
+ffplay -pixel_format nv12 -video_size 640x360 0.yuv
+
+在Linux中，查看服务器运行时长可以使用uptime命令或者查看/proc/uptime文件
+
+/*************************************************************************/
+cat /ipc_config/var/config/wpa_supplicant.conf 
+lwj.sh<<
+killall -9 wpa_supplicant udhcpc
+export LD_LIBRARY_PATH=/customer/ssh/lib:/customer/tutkipc/lib:/customer/tutkipc/wifi:$LD_LIBRARY_PATH
+export PATH=/customer/tutkipc/wifi:$PATH
+wpa_supplicant -i wlan0 -B -c /ipc_config/var/config/wpa_supplicant.conf
+sleep 2
+udhcpc -i wlan0 -s /etc/init.d/udhcpc.script 
+>>
+network={
+ ssid="mdsm"
+  psk="qijing123"
+}
+连接WiFi
+wpa_supplicant -i wlan0 -B -c /ipc_config/var/config/wpa_supplicant.conf
+
+动态获取IP
+udhcpc -i wlan0
+udhcpc -i wlan0 -s /etc/init.d/udhcpc.script 
+/*************************************************************************/
+
+# 查看静态库中的文件列表  
+ar -t libyourlibrary.a  
+  
+# 提取静态库中的单个对象文件内容（但不会生成独立的.o文件）  
+ar -x libyourlibrary.a yourfile.o  
+# 注意：这会将 yourfile.o 的内容提取到当前目录中，但文件名可能会被截断或改变  
+# 而且，即使你得到了文件内容，它也不是一个可以直接使用的独立.o文件  
+  
+# 使用 objdump 查看对象文件内容  
+objdump -h yourfile.o  # 查看头信息  
+objdump -s yourfile.o  # 查看节（section）内容
+/*************************************************************************/
+
+
+从文件提取函数
+```[.\-<>,+：）。，\\\r\n a-z,A-Z\{//\};(_0-9!#")*=\[\]&|%-'\}:\t?（\u4e00-\u9fa5]+
+
+
+/*************************************************************************/
+
+使用arping检测IP地址冲突
+arping -c 3 -f -D 192.168.1.100
+结果解读：在收到回复时，注意查看返回的MAC地址。如果同一个IP地址对应多个不同的MAC地址，那么说明存在IP地址冲突。
+
+tr
+将小写字母转换为大写字母
+删除字符串中的数字
+将字符串中的连续空格压缩为一个
+
+创建一个空白文件，占用n个字节
+dd if=/dev/zero of=文件名 bs=1M count=10
+
+devmem 0x40000000 w 0x12345678
+/*************************************************************************/

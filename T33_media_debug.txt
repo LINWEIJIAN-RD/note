@@ -1,0 +1,122 @@
+
+《T33最大分辨率和编码》
+5MP@30fps 仅代表 Sensor 采集能力，ISP 原生输出最大仅 2880 宽，软件拼接出来的超大宽幅不受 ISP 约束，但受 VPU 编码硬件约束；
+JPEG 抓拍无宽高限制（最高 16K×16K），仅 H.264/H.265 实时编码存在 最大3200x2048的分辨率；
+如果必须原生 3840 完整 4K 全景编码，只能更换 T32Pro（编码器最大宽 4096，原生支持 4K）。
+
+=================================
+像素档	典型分辨率	俗称
+1MP		1280×720	720P
+2MP		1920×1080	1080P / 全高清
+4MP		2560×1440	2K
+5MP		2560×1920	500 万	不是16:9
+8MP		3840×2160	4K
+=================================
+
+for i in `seq 0 100`;do printf "0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x\n" `devmem 0x10054014` `devmem 0x10054020` `devmem 0x10054024` `devmem 0x10023014` `devmem 0x10023020` `devmem 0x10023024`;done
+
+while true;do cat /proc/jz/isp/isp-w02;sleep 1;done
+while true;do cat /proc/tisp;sleep 1;done
+ISP处理完成的帧数：
+while true;do cat /proc/jz/isp/isp-m0 | grep debug;sleep 1;done
+cat /proc/jz/isp/isp-fs;sleep 1;cat /proc/jz/isp/isp-fs
+while true;do impdbg --enc_info | grep CHANNEL;sleep 1;done
+for i in `seq 0 10`;do cat /proc/jz/isp/isp-ivdc;sleep 1;done
+impdbg --sys;sleep 1;impdbg --sys
+cat /proc/jz/clock/clocks
+logcat
+
+获取编码实时帧率方式：while true;do impdbg --enc_info |grep "CHANNEL";sleep 10;done
+获取模块时钟方式：cat /proc/jz/clock/clocks
+查看模块绑定关系：impdbg --sys
+查看framesource参数配置：impdbg --fs;touch /tmp/fsattr;logcat
+
+<direct_mode>
+insmod tx-isp-PRJ007.ko direct_mode=1
+
+获取sensor RAW图像数据
+impdbg --snap_raw 0 /tmp/a.raw 1 3 0
+获取到的raw数据用ffplay播放ffplay -f rawvideo -pixel_format bayer_rggb16le -video_size 1920x1080 -i a.raw
+
+获取nv12数据
+touch /tmp/mountdir/ispsnap0.nv12
+touch /tmp/mountdir/encsnap0.nv12
+touch /tmp/mountdir/osdsnap0.nv12
+获取到的nv12数据用ffplay播放ffplay -f rawvideo -pixel_format nv12 -video_size 1920x1080 -i ispsnap0.nv12
+
+《ffplay 打开nv12图片》
+ffplay -f rawvideo -pixel_format nv12 -video_size 640x360 -i <文件名.nv12>
+
+IVDC (ISP-VPU Data Channel/Direct Connect)：ISP-VPU 数据直通模块。这是一个位于 ISP 和 VPU（视频处理单元/编码器）之间的硬件缓冲桥梁。
+
+《BSP应用开发》
+1.isp启动加载参数说明
+2.sensor,isp驱动编译说明
+3.iq图形效果
+
+《sdk调试指南》
+1.图形异常分析，抓取raw,nv12
+2.获取sensor,isp，ivdc,编码的实时帧率
+3.获取模块时钟
+4.编码通道绑定关系
+	4.1"读写寄存器"
+	ech0 r sen_reg 0x0a > /proc/jz/isp/isp-w00; cat /proc/jz/isp/isp-w00
+	ech0 w sen_reg 0x0a 0x01 > /proc/jz/isp/isp-w00
+	4.2"查看模块绑定"
+	impdbg --fs //查看framesource通道信息
+	touch /tmp/fsattr;logcat //查看framesource参数配置
+	4.3
+5.优先级修改
+
+《码率控制使用指南》
+1.帧率不足处理方式
+2.码率控制
+3.产品码率参数推荐
+4.码率控制模式vbr/cbr
+
+《媒体功能开发参考》
+1.isp、编码、ivs、ipu模块
+2.系统控制
+3.音频
+
+获取tnpu运行状态
+
+《图像缩放和裁剪》
+fs_chn_attr.picWidth/picHeight要和缩放裁剪后的数据一直，不然会出现图像异常
+fs_chn_attr.frop/scaler,裁剪和缩放的参数和比例或者32/64整数倍有关
+
+《音频调试》
+ffmpeg -i CameraStar.amr -ar 16000 -ac 1 CameraStar.wav
+
+ffmpeg -v verbose -rtsp_transport tcp \
+  -fflags +genpts+nobuffer \
+  -err_detect crccheck+buffer \
+  -i rtsp://192.168.10.169:554/ch0/track0 \
+  -f null -
+  
+ffmpeg -rtsp_transport tcp -i rtsp://192.168.10.169:554/ch0/track0
+
+
+《RTP包数据分层》
+RTP小包
+[12B RTP Header]
+└── 【RTP载荷层：无任何额外FU/聚合前缀，直接完整裸NAL】
+    子层1：2字节原生HEVC NAL Header（PayloadHdr）
+    子层2：NAL RBSP编码数据（VPS/SPS/PPS/小图像数据）
+   
+RTP大包需要分片
+[12B RTP Header]
+└─ RTP载荷区
+   1. PayloadHdr（固定2字节，核心：存放F、LayerId、TID、Type=49）
+	└─	Byte 0（载荷第1字节）：bit7=F | bit6~1=Type(固定49) | bit0=LayerId高1bit
+		Byte 1（载荷第2字节）：bit7~2=LayerId低5bit | bit2~0=TID（nuh_temporal_id_plus1）
+   2. FU Header（1字节，仅S/E/原始nal_type，**不含LayerId/TID**）
+	└─	Byte 3（载荷第3字节）：bit7=S(首分片标记) | bit6=E(尾分片标记) | bit5=保留0 | bit0~5=原始nal_unit_type
+   3. FU Payload（原始NAL剥离2字节NAL头后的RBSP分片数据）
+
+分层项			小包单 NAL				FU 分片大包
+RTP 外层头		12 字节，PT=96			12 字节，PT=96
+RTP 载荷开头		直接 2 字节 NAL 头		2 字节 FU 前缀（Ind+Hdr）
+是否保留原始NAL头	完整保留					剥离，解码器重组时手动补回
+适用NAL类型		VPS/SPS/PPS、小尺寸I/P帧	大尺寸 IDR/I/P 图像帧
+头部额外开销		0 字节					2 字节 FU 前缀

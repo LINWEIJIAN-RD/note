@@ -1,0 +1,48 @@
+配置文件默认路径：
+/etc/default/default_parameter_user
+
+三元组配置文件路径：
+/user_rw/user_data/device_info.ini
+
+音频文件存放路径：
+/system/resource/audio
+
+
+cfg set spk_volume=50;cfg save
+spk_volume
+
+
+insmod ATBM606x_wifi_usb.ko wifi_bt_comb=1 //1:加载 WiFi+BLE 固件 0：加载完整版 WiFi 固件
+
+ mount -t nfs -o vers=3,nolock,soft,timeo=500,retrans=3 192.168.10.85:/home/lwj/works/lwj /tmp/nfs
+ 
+==============保留&恢复现场==============
+cat /dev/mtd0 /dev/mtd1 /dev/mtd2 /dev/mtd3 /dev/mtd4 > /mnt/flash.bin
+把flash.bin去除烧写到设备即可
+---------------------------------------
+
+工程环境关键目录
+Z:\lwj\ipc\B_IPC_Camera\project\T33N\build\build_config\t33n-common-16M-wifi
+
+gpio复用文件
+
+
+==============扫码库 zbar==============
+git clone https://github.com/ZBar/ZBar.git
+---------------------------------------
+
+==============调试信息==============
+使用sudo ./build.sh t33n-common-16M-wifi v0.0.1 appclean app编译app时会被romfs-inst.sh脚本strip压缩丢失调试信息
+/home/lwj/works/lwj/ipc/B_IPC_Camera/project/T33N/script/romfs-inst.sh
+编译参数文件：/home/lwj/works/lwj/ipc/B_IPC_Camera/project/t33n_prj_env.mk
+增加算法库编译后程序增大1m左右
+怎加扫码库，程序增大120k左右
+
+视频效果优化
+T32 SDK rmem_calculator_V1.3 计算码率调整isp参数，优化内存 memopt
+修改qp值，码率控制器，码率
+
+读写sensor寄存器
+echo r sen_reg 0x0f >/proc/jz/isp/isp-w00 ;cat /proc/jz/isp/isp-w00
+echo w sen_reg 0x0a 0x01 >/proc/jz/isp/isp-w00
+---------------------------------------

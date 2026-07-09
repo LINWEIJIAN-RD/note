@@ -1,0 +1,17 @@
+《wrap》
+LD_PRELOAD 运行期拦截（动态库，不改源码）
+	├── 优点：不改代码、方便在测试/生产上临时注入。
+	├── 缺点：对静态链接无效；需要动态链接且系统支持 LD_PRELOAD。
+注意事项：
+	├── dlsym(RTLD_NEXT,"malloc") 在 constructor 或初始化阶段可能递归，使用 pthread_once 或延迟初始化可避免。
+	├── 如果在 malloc wrapper 里调用会再次触发 malloc（例如 fprintf、malloc-based logging），会造成递归/死锁。可使用 write(2) 或把日志缓冲到线程局部简单结构，或在初始化阶段设置 flag bypass。
+	├── 若想采集调用栈，用 backtrace()/backtrace_symbols() 或 libunwind。backtrace_symbols 会 malloc；改用 backtrace() + addr2line 后处理或 libunwind 以避免递归。
+
+链接时 wrap（-Wl,--wrap）
+	├──优点：对静态、动态都有效，编译期替换，避免 LD_PRELOAD。
+	
+《dmalloc》
+	注意：
+	├── 必须用 source或 export，不能直接执行 dmalloc 命令（子 shell 不生效），需要在环境变量里面设置DMALLOC_OPTIONS=
+	├── 在运行程序里面加入#ifdef DMALLOC dmalloc_shutdown();   // 强制刷 log #endif
+	├── 不要编译算法检测库

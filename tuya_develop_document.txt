@@ -1,0 +1,27 @@
+涂鸦对接文档；https://developer.tuya.com/cn/docs/iot-device-dev/IPC_SDK?id=Kaqe10hg0htn5#title-42-%E4%BD%8E%E5%8A%9F%E8%80%97%E8%AE%BE%E5%A4%87%E5%8A%9F%E8%83%BD%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96
+
+涂鸦交流社区：https://www.tuyaos.com/search.php?keywords=tkl_wifi_station_connect&sid=02e2452606ba4e7b0120c3f35dc52df7
+
+多种配网方式组合配置：
+	https://developer.tuya.com/cn/docs/iot-device-dev/tuyaos-package-ipc-device?id=Kcnreachs0j13
+	
+蓝牙配网：
+	https://developer.tuya.com/cn/docs/iot-device-dev/tuyaos-package-ipc-device?id=Kcv9vq9pubeja
+	https://developer.tuya.com/cn/docs/iot-device-dev/tuyaos-gateway-pairing-ble?id=Kc29rxpu0qqfx#title-5-%E6%95%B0%E6%8D%AE%E6%A0%BC%E5%BC%8F
+	https://developer.tuya.com/cn/docs/iot-device-dev/robot_ble_distribution_network?id=Kd93nvlhfoqp6
+
+https://www.tuyaos.com/viewtopic.php?t=4375&hilit=tkl_ble_gatts_service_add&sid=e2999f53ace9bd3c81e62ad5a34a654e
+https://developer.tuya.com/cn/docs/iot-device-dev/tuyaos-gateway-pairing-ble?id=Kc29rxpu0qqfx#title-0-%E6%A6%82%E8%BF%B0
+
+有线配网：
+	https://developer.tuya.com/cn/docs/iot-device-dev/tuyaos-gateway-pairing-wired?id=Kc1nxds4r7ubz
+
+嵌入式多媒体开发技能树：	
+	https://www.tuyaos.com/viewtopic.php?t=71&start=10&sid=32574fb7ef8ed73c2c241d8b495a451c
+	
+涂鸦云端AI检测
+	https://developer.tuya.com/cn/docs/iot-device-dev/tuyaos-package-ipc-device?id=Keqtfi7obdwf0
+	
+	
+涂鸦授权码管理：
+	在设备->授权码管理，找到对应的订单，拆分出50个后，把这个50个更换产品成T33后进行授权码清单下载

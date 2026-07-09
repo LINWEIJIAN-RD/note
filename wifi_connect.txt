@@ -1,0 +1,18 @@
+
+--------上层脚本反复“重试连接”但没有真正清理现场---------
+如果脚本没有把这些对象彻底清干净：
+老的 wpa_supplicant 还活着
+control socket 残留
+driver interface 未 fully down/up
+p2p0 也在占资源
+上层误判 “WIFI_OK”
+那就很容易造成“永远 scan 不关联”。
+---------------------------------------------------
+
+wifi连接调试
+wpa_cli -i wlan0 list_networks
+wpa_cli -i wlan0 scan_results
+确认：
+目标 SSID 是否还在 network list 里
+目标 AP 是否能扫到
+当前是否选中了正确 network id
