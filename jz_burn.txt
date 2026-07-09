@@ -1,0 +1,53 @@
+
+flash 16M
+mw.b 0x80600000 0xff 0x1000000
+fatload mmc 0 0x80600000 QY23R84X401_2_00_00_63_16M.bin
+sf probe
+sf erase 0x0 0x1000000
+sf write 0x80600000 0x0 0x1000000
+
+flash 8M
+mw.b 0x80600000 0xff 0x1000000
+fatload mmc 0 0x80600000 j23r83x56b_2_00_02_71.bin
+sf probe
+sf erase 0x0 0x800000
+sf write 0x80600000 0x0 0x800000
+
+# 一键烧录脚本
+isvp_t23# mmc rescan
+isvp_t23# sf probe
+isvp_t23# fatload mmc 0:1 0x80600000 uImage.lzma
+isvp_t23# sf erase 0x40000 0x280000
+isvp_t23# sf write 0x80600000 0x40000 0x1A329D
+isvp_t23# fatload mmc 0:1 0x80600000 rootfs.jffs2
+isvp_t23# sf erase 0x2C0000 0x400000
+isvp_t23# sf write 0x80600000 0x2C0000 0xF8000
+isvp_t23# reset
+
+setenv bootargs 'console=ttyS1,115200n8 mem=32M@0x0 rmem=32M@0x2000000 init=/linuxrc rootfstype=jffs2 root=/dev/mtdblock2 rw mtdparts=jz_sfc:256k(boot),2560k(kernel),4096k(root),-(appfs)'
+bootargs=console=ttyS1,115200n8 mem=45M@0x0 rmem=19M@0x2D00000 init=/linuxrc rootfstype=squashfs root=/dev/mtdblock2 rw mtdparts=jz_sfc:256k(boot),1712k(kernel),5872k(root),192k(appfs),160k(user)
+
+# 临时测试而不写入
+fatload mmc 0 0x82000000 kernel_test.bin
+bootm 0x82000000
+
+查看SD卡文件
+fatls mmc 0
+
+
+# 正确的 rootfs 烧写命令
+mw.b 0x80600000 0xff 0x1000000
+fatload mmc 0 0x80600000 rootfs.squashfs
+sf probe
+sf erase 0x1EC000 0x5BC000      # 擦除 rootfs 分区
+sf write 0x80600000 0x1EC000 0x5BC000  # 写入到 rootfs 分区
+
+# 查看MTD分区
+cat /proc/mtd
+# mtd2: 00040000 00020000 "bootloader"
+# 擦除U-Boot分区
+flash_eraseall /dev/mtd2
+# 写入新的rootfs
+flashcp -v rootfs.squashfs /dev/mtd2
+# 重启系统
+reboot
